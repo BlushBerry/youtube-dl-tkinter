@@ -23,8 +23,8 @@ class App:
 
   #This function uses youtube-dl to extract mp3 audio from a youtube url and formats in our entry text in e1
   def download(self):
+    print("youtube-dl-tkinter: Initializing download of url {}".format(self.e1.get()))
     os.system("youtube-dl --extract-audio --audio-format mp3 {}".format(self.e1.get()))
-    print(self.e1.get())
 
 app = App(root)
 root.mainloop()
