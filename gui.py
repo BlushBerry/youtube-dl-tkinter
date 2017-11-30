@@ -1,11 +1,34 @@
 from tkinter import *
 import os
+import subprocess
+from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 
 # Initialize TK and set it as the root window
 root = Tk()
 root.title("youtube-dl-tkinter")
 
+
+
+class ProgressDialog:
+    def __init__(self, parent):
+
+        top = self.top = Toplevel(parent)
+        Label(top, text="Progress").pack()
+        self.value = ""
+        self.text = Text(top)
+        self.text.pack()
+
+        b = Button(top, text="OK", command=self.ok)
+        b.pack(pady=5)
+
+    def updateview(self, value):
+        self.value = value
+        self.text.insert(INSERT, value)
+
+    def ok(self):
+        print("value is", self.value)
+        self.top.destroy()
 
 class App:
     url = Label(root, text="Youtube URL: ").grid(row=2)
@@ -17,6 +40,7 @@ class App:
     e2.grid(row=1, column=1)
     queue = Listbox(root)
     downloadqueue = []
+
 
     # Initialize
     def __init__(self, master):
@@ -51,11 +75,19 @@ class App:
 
     def download(self):
         print("youtube-dl-tkinter: Initializing download of url {} to destination {}".format(self.e1.get(),
-                                                                                             self.chosenfolder.get()))
+        self.chosenfolder.get()))
+
+        d = ProgressDialog(root)
+        
         while not self.downloadqueue == [] :
-            os.system(
-                "youtube-dl -o '{}/%(title)s.%(ext)s' --extract-audio --audio-format mp3 {}".format(self.chosenfolder.get(),
-                                                                                                self.downloadqueue.pop()))
+            shellcmd = "youtube-dl -o '{}/%(title)s.%(ext)s' --extract-audio --audio-format mp3 {}".format(self.chosenfolder.get(),
+                                                                                                self.downloadqueue.pop())
+            result = subprocess.check_output(shellcmd, shell=True)
+            d.updateview(result)
+            
+        root.wait_window(d.top)    
+
+
     def add(self):
         print("youtube-dl-tkinter: Youtube Url {} Added to queue!".format(self.e1.get()))
         self.queue.insert(END, self.e1.get())
